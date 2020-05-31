@@ -17,6 +17,7 @@
 //! use smol::Async;
 //! use std::net::TcpStream;
 //!
+//! # fn main() -> std::io::Result<()> { smol::run(async {
 //! // A client that echoes messages back to the server.
 //! let stream = Async::<TcpStream>::connect("127.0.0.1:8000").await?;
 //!
@@ -26,6 +27,7 @@
 //!
 //! // Echo data received from the reader back into the writer.
 //! io::copy(reader, &mut writer).await?;
+//! # Ok(()) }) }
 //! ```
 //!
 //! Share an async I/O handle:
