@@ -1,0 +1,21 @@
+[package]
+name = "async-dup"
+version = "1.0.0"
+authors = ["Stjepan Glavina <stjepang@gmail.com>"]
+edition = "2018"
+description = "Duplicate an async I/O handle"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/stjepang/async-dup"
+homepage = "https://github.com/stjepang/async-dup"
+documentation = "https://docs.rs/async-dup"
+keywords = ["asynchronous", "duplicate", "clone", "split", "share"]
+categories = ["asynchronous", "concurrency"]
+readme = "README.md"
+
+[dependencies]
+futures-io = "0.3.5"
+simple-mutex = "1.1.5"
+
+[dev-dependencies]
+futures = { version = "0.3.5", default-features = false, features = ["std"] }
+smol = "0.1.10"
