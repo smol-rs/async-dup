@@ -2,8 +2,10 @@
 //!
 //! This crate provides two tools, [`Arc`] and [`Mutex`]:
 //!
-//! * [`Arc`] implements [`AsyncRead`] and [`AsyncWrite`] if a reference to the inner type does.
-//! * A reference to [`Mutex`] implements [`AsyncRead`] and [`AsyncWrite`] if the inner type does.
+//! * [`Arc`] implements [`AsyncRead`], [`AsyncWrite`], and [`AsyncSeek`] if a reference to the
+//!   inner type does.
+//! * A reference to [`Mutex`] implements [`AsyncRead`], [`AsyncWrite`], and [`AsyncSeek`] if the
+//!   inner type does.
 //!
 //! Wrap an async I/O handle in [`Arc`] or [`Mutex`] to clone it or share among tasks.
 //!
@@ -48,12 +50,12 @@
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::io::{self, IoSlice, IoSliceMut};
+use std::io::{self, IoSlice, IoSliceMut, SeekFrom};
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures_io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncSeek, AsyncWrite};
 
 /// A reference-counted pointer that implements async I/O traits.
 ///
@@ -61,6 +63,7 @@ use futures_io::{AsyncRead, AsyncWrite};
 ///
 /// - `impl<T> AsyncRead for Arc<T> where &T: AsyncRead {}`
 /// - `impl<T> AsyncWrite for Arc<T> where &T: AsyncWrite {}`
+/// - `impl<T> AsyncSeek for Arc<T> where &T: AsyncSeek {}`
 pub struct Arc<T>(std::sync::Arc<T>);
 
 impl<T> Unpin for Arc<T> {}
@@ -135,6 +138,7 @@ impl<T> From<T> for Arc<T> {
 //
 // - `impl<T> AsyncRead for &Arc<T> where &T: AsyncRead {}`
 // - `impl<T> AsyncWrite for &Arc<T> where &T: AsyncWrite {}`
+// - `impl<T> AsyncSeek for &Arc<T> where &T: AsyncSeek {}`
 //
 // However, those impls sometimes make Rust's type inference try too hard when types cannot be
 // inferred. In the end, instead of complaining with a nice error message, the Rust compiler ends
@@ -192,6 +196,19 @@ where
     }
 }
 
+impl<T> AsyncSeek for Arc<T>
+where
+    for<'a> &'a T: AsyncSeek,
+{
+    fn poll_seek(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        pos: SeekFrom,
+    ) -> Poll<io::Result<u64>> {
+        Pin::new(&mut &*self.0).poll_seek(cx, pos)
+    }
+}
+
 /// A mutex that implements async I/O traits.
 ///
 /// This is a blocking mutex that adds the following impls:
@@ -200,6 +217,8 @@ where
 /// - `impl<T> AsyncRead for &Mutex<T> where &T: AsyncRead + Unpin {}`
 /// - `impl<T> AsyncWrite for Mutex<T> where &T: AsyncWrite + Unpin {}`
 /// - `impl<T> AsyncWrite for &Mutex<T> where &T: AsyncWrite + Unpin {}`
+/// - `impl<T> AsyncSeek for Mutex<T> where &T: AsyncSeek + Unpin {}`
+/// - `impl<T> AsyncSeek for &Mutex<T> where &T: AsyncSeek + Unpin {}`
 pub struct Mutex<T>(simple_mutex::Mutex<T>);
 
 impl<T> Mutex<T> {
@@ -405,6 +424,26 @@ impl<T: AsyncWrite + Unpin> AsyncWrite for &Mutex<T> {
 
     fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut *self.lock()).poll_close(cx)
+    }
+}
+
+impl<T: AsyncSeek + Unpin> AsyncSeek for Mutex<T> {
+    fn poll_seek(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        pos: SeekFrom,
+    ) -> Poll<io::Result<u64>> {
+        Pin::new(&mut *self.lock()).poll_seek(cx, pos)
+    }
+}
+
+impl<T: AsyncSeek + Unpin> AsyncSeek for &Mutex<T> {
+    fn poll_seek(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        pos: SeekFrom,
+    ) -> Poll<io::Result<u64>> {
+        Pin::new(&mut *self.lock()).poll_seek(cx, pos)
     }
 }
 
