@@ -13,8 +13,8 @@ Duplicate an async I/O handle.
 
 This crate provides two tools, `Arc` and `Mutex`:
 
-* `Arc` implements `AsyncRead` and `AsyncWrite` if a reference to the inner type does.
-* A reference to `Mutex` implements `AsyncRead` and `AsyncWrite` if the inner type does.
+* `Arc` implements `AsyncRead`, `AsyncWrite`, and `AsyncSeek` if a reference to the inner type does.
+* A reference to `Mutex` implements `AsyncRead`, `AsyncWrite`, and `AsyncSeek` if the inner type does.
 
 Wrap an async I/O handle in `Arc` or `Mutex` to clone it or share among tasks.
 
