@@ -1,3 +1,7 @@
+# Version 1.2.0
+
+- Make the inner `std::sync::Arc` public.
+
 # Version 1.1.0
 
 - Implement `AsyncSeek` for `Arc`, `Mutex`, and `&Mutex`.
