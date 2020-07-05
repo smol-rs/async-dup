@@ -64,7 +64,7 @@ use futures_io::{AsyncRead, AsyncSeek, AsyncWrite};
 /// - `impl<T> AsyncRead for Arc<T> where &T: AsyncRead {}`
 /// - `impl<T> AsyncWrite for Arc<T> where &T: AsyncWrite {}`
 /// - `impl<T> AsyncSeek for Arc<T> where &T: AsyncSeek {}`
-pub struct Arc<T>(std::sync::Arc<T>);
+pub struct Arc<T>(pub std::sync::Arc<T>);
 
 impl<T> Unpin for Arc<T> {}
 
