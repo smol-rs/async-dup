@@ -1,3 +1,7 @@
+# Version 1.2.1
+
+- Forbid unsafe code.
+
 # Version 1.2.0
 
 - Make the inner `std::sync::Arc` public.
