@@ -1,3 +1,7 @@
+# Version 1.2.2
+
+- Fix typos in the docs.
+
 # Version 1.2.1
 
 - Forbid unsafe code.

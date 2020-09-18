@@ -214,12 +214,12 @@ where
 ///
 /// This is a blocking mutex that adds the following impls:
 ///
-/// - `impl<T> AsyncRead for Mutex<T> where &T: AsyncRead + Unpin {}`
-/// - `impl<T> AsyncRead for &Mutex<T> where &T: AsyncRead + Unpin {}`
-/// - `impl<T> AsyncWrite for Mutex<T> where &T: AsyncWrite + Unpin {}`
-/// - `impl<T> AsyncWrite for &Mutex<T> where &T: AsyncWrite + Unpin {}`
-/// - `impl<T> AsyncSeek for Mutex<T> where &T: AsyncSeek + Unpin {}`
-/// - `impl<T> AsyncSeek for &Mutex<T> where &T: AsyncSeek + Unpin {}`
+/// - `impl<T> AsyncRead for Mutex<T> where T: AsyncRead + Unpin {}`
+/// - `impl<T> AsyncRead for &Mutex<T> where T: AsyncRead + Unpin {}`
+/// - `impl<T> AsyncWrite for Mutex<T> where T: AsyncWrite + Unpin {}`
+/// - `impl<T> AsyncWrite for &Mutex<T> where T: AsyncWrite + Unpin {}`
+/// - `impl<T> AsyncSeek for Mutex<T> where T: AsyncSeek + Unpin {}`
+/// - `impl<T> AsyncSeek for &Mutex<T> where T: AsyncSeek + Unpin {}`
 pub struct Mutex<T>(simple_mutex::Mutex<T>);
 
 impl<T> Mutex<T> {
