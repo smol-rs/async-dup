@@ -19,9 +19,9 @@
 //! use smol::Async;
 //! use std::net::TcpStream;
 //!
-//! # fn main() -> std::io::Result<()> { smol::run(async {
+//! # fn main() -> std::io::Result<()> { smol::block_on(async {
 //! // A client that echoes messages back to the server.
-//! let stream = Async::<TcpStream>::connect("127.0.0.1:8000").await?;
+//! let stream = Async::<TcpStream>::connect(([127, 0, 0, 1], 8000)).await?;
 //!
 //! // Create two handles to the stream.
 //! let reader = Arc::new(stream);
