@@ -10,7 +10,6 @@ homepage = "https://github.com/smol-rs/async-dup"
 documentation = "https://docs.rs/async-dup"
 keywords = ["asynchronous", "duplicate", "clone", "split", "share"]
 categories = ["asynchronous", "concurrency"]
-readme = "README.md"
 
 [dependencies]
 futures-io = "0.3.5"
