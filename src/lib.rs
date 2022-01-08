@@ -272,11 +272,7 @@ impl<T> Mutex<T> {
     /// # ;
     /// ```
     pub fn try_lock(&self) -> Option<MutexGuard<'_, T>> {
-        if let Some(guard) = self.0.try_lock() {
-            Some(MutexGuard(guard))
-        } else {
-            None
-        }
+        self.0.try_lock().map(MutexGuard)
     }
 
     /// Consumes the mutex, returning the underlying data.
