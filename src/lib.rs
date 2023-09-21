@@ -60,6 +60,7 @@ use std::hash::{Hash, Hasher};
 use std::io::{self, IoSlice, IoSliceMut, SeekFrom};
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
+use std::sync::TryLockError;
 use std::task::{Context, Poll};
 
 use futures_io::{AsyncRead, AsyncSeek, AsyncWrite};
@@ -226,7 +227,7 @@ where
 /// - `impl<T> AsyncWrite for &Mutex<T> where T: AsyncWrite + Unpin {}`
 /// - `impl<T> AsyncSeek for Mutex<T> where T: AsyncSeek + Unpin {}`
 /// - `impl<T> AsyncSeek for &Mutex<T> where T: AsyncSeek + Unpin {}`
-pub struct Mutex<T>(simple_mutex::Mutex<T>);
+pub struct Mutex<T>(std::sync::Mutex<T>);
 
 impl<T> Mutex<T> {
     /// Creates a new mutex.
@@ -256,7 +257,7 @@ impl<T> Mutex<T> {
     /// assert_eq!(*guard, 10);
     /// ```
     pub fn lock(&self) -> MutexGuard<'_, T> {
-        MutexGuard(self.0.lock())
+        MutexGuard(self.0.lock().unwrap_or_else(|e| e.into_inner()))
     }
 
     /// Attempts to acquire the mutex.
@@ -278,7 +279,16 @@ impl<T> Mutex<T> {
     /// # ;
     /// ```
     pub fn try_lock(&self) -> Option<MutexGuard<'_, T>> {
-        self.0.try_lock().map(MutexGuard)
+        self.0
+            .try_lock()
+            .map_or_else(
+                |e| match e {
+                    TryLockError::Poisoned(e) => Some(e.into_inner()),
+                    TryLockError::WouldBlock => None,
+                },
+                Some,
+            )
+            .map(MutexGuard)
     }
 
     /// Consumes the mutex, returning the underlying data.
@@ -292,7 +302,7 @@ impl<T> Mutex<T> {
     /// assert_eq!(mutex.into_inner(), 10);
     /// ```
     pub fn into_inner(self) -> T {
-        self.0.into_inner()
+        self.0.into_inner().unwrap_or_else(|e| e.into_inner())
     }
 
     /// Returns a mutable reference to the underlying data.
@@ -310,7 +320,7 @@ impl<T> Mutex<T> {
     /// assert_eq!(*mutex.lock(), 10);
     /// ```
     pub fn get_mut(&mut self) -> &mut T {
-        self.0.get_mut()
+        self.0.get_mut().unwrap_or_else(|e| e.into_inner())
     }
 }
 
@@ -451,7 +461,7 @@ impl<T: AsyncSeek + Unpin> AsyncSeek for &Mutex<T> {
 }
 
 /// A guard that releases the mutex when dropped.
-pub struct MutexGuard<'a, T>(simple_mutex::MutexGuard<'a, T>);
+pub struct MutexGuard<'a, T>(std::sync::MutexGuard<'a, T>);
 
 impl<T: fmt::Debug> fmt::Debug for MutexGuard<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
