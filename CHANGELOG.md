@@ -1,3 +1,7 @@
+# Version 1.2.3
+
+- Remove the unnecessary `simple-mutex` dependency. (#10)
+
 # Version 1.2.2
 
 - Fix typos in the docs.
