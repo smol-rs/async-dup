@@ -17,6 +17,7 @@ categories = ["asynchronous", "concurrency"]
 exclude = ["/.*"]
 
 [dependencies]
+async-lock = "3.1.0"
 futures-io = "0.3.5"
 
 [dev-dependencies]
