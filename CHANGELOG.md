@@ -1,3 +1,7 @@
+# Version 1.2.4
+
+- Use the `async-lock` crate as the locking mechanism. (#14)
+
 # Version 1.2.3
 
 - Remove the unnecessary `simple-mutex` dependency. (#10)
