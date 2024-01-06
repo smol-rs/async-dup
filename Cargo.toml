@@ -22,4 +22,4 @@ futures-io = "0.3.5"
 
 [dev-dependencies]
 futures = { version = "0.3.5", default-features = false, features = ["std"] }
-smol = "1"
+smol = "2"
